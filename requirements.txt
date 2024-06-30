@@ -2,3 +2,6 @@ streamlit
 streamlit-mic-recorder
 openai
 python-dotenv
+language-tool-python
+openai-whisper
+ffmpeg-python
