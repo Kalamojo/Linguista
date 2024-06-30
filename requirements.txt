@@ -2,3 +2,5 @@ streamlit
 streamlit-mic-recorder
 openai
 python-dotenv
+streamlit-chat 
+streamlit-webrtc
