@@ -1,7 +1,8 @@
 import streamlit as st
 from streamlit_chat import message
-from streamlit_webrtc import webrtc_streamer, WebRtcMode, ClientSettings
+from streamlit_mic_recorder import mic_recorder
 import openai
+from openai import OpenAI
 import whisper
 import numpy as np
 import tempfile
@@ -10,27 +11,32 @@ from dotenv import load_dotenv
 
 load_dotenv()
 openai_key = os.getenv("OPENAI_API_KEY")
-openai.api_key = openai_key
+client = OpenAI(api_key=openai_key)
 
-model = whisper.load_model("text-embedding-3-large")
+model = whisper.load_model("base")
 
 # Function to convert audio to text w/ Whisper
 def convert_audio_to_text(audio_data):
     with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp_file:
-        tmp_file.write(audio_data.tobytes())
+        tmp_file.write(audio_data)
         tmp_file_path = tmp_file.name
 
-    result = model.transcribe(tmp_file_path)
-    return result['text']
+    audio = whisper.load_audio(tmp_file_path)
+    audio = whisper.pad_or_trim(audio)
+    mel = whisper.log_mel_spectrogram(audio).to(model.device)
+    options = whisper.DecodingOptions(language="en")
+    result = whisper.decode(model, mel, options)
+    return result.text
 
 # Function to get response from GPT
 def get_response_from_model(user_input):
-    response = openai.Completion.create(
-        engine="gpt-4o",
-        prompt=user_input,
-        max_tokens=150
+    print(user_input)
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": user_input}]
     )
-    return response.choices[0].text.strip()
+    print(response)
+    return response.choices[0].message.content
 
 # Function to get model response
 def get_model_response(user_input):
@@ -39,24 +45,17 @@ def get_model_response(user_input):
 # Main app logic
 st.title("Language Chat")
 
-# Real-time audio  
-webrtc_ctx = webrtc_streamer(
-    key="example",
-    mode=WebRtcMode.SENDONLY,
-    client_settings=ClientSettings(
-        media_stream_constraints={
-            "audio": True,
-            "video": False,
-        },
-    ),
-)
-
-if webrtc_ctx.audio_receiver:
-    audio_frames = webrtc_ctx.audio_receiver.get_frames(timeout=1)
-    if audio_frames:
-        audio_data = audio_frames[0].to_ndarray()
-        audio_text = convert_audio_to_text(audio_data)
+def recording_callback():
+    if st.session_state.my_recorder_output:
+        audio_bytes = st.session_state.my_recorder_output['bytes']
+        audio_text = convert_audio_to_text(audio_bytes)
         message(audio_text, is_user=True)
+        model_response = get_model_response(audio_text)
+        message(model_response, is_user=False)
+
+mic_recorder(key='my_recorder', callback=recording_callback)
+
+
 
 user_input = st.text_input("You: ")
 if user_input:
