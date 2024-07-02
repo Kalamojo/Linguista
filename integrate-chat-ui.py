@@ -118,7 +118,7 @@ def convert_audio_to_text(audio_data, language_code):
     #options = whisper.DecodingOptions(language=language_code)
     #result = whisper.decode(model, mel, options)
     audio_file = io.BytesIO(audio_data)
-    result = whisper.transcribe(audio_file, language=language_code)
+    result = model.transcribe(audio_file, language=language_code)
     return result.text
 
 def recording_callback():
