@@ -117,7 +117,7 @@ def convert_audio_to_text(audio_data, language_code):
     #mel = whisper.log_mel_spectrogram(load_audio(audio_data)).to(model.device)
     #options = whisper.DecodingOptions(language=language_code)
     #result = whisper.decode(model, mel, options)
-    audio_file = io.BytesIO(audio_bytes)
+    audio_file = io.BytesIO(audio_data)
     result = whisper.transcribe(audio_file, language=language_code)
     return result.text
 
