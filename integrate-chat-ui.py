@@ -9,8 +9,8 @@ import json
 import os
 from dotenv import load_dotenv
 import io
-# import ffmpeg
-# import numpy as np
+import ffmpeg
+import numpy as np
 
 load_dotenv()
 openai_key = os.getenv("OPENAI_API_KEY")
