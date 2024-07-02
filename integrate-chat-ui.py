@@ -103,7 +103,7 @@ def load_audio(file: tuple[str, bytes], sr: int = 16000):
     except ffmpeg.Error as e:
         raise RuntimeError(f"Failed to load audio: {e.stderr.decode()}") from e
 
-    return np.frombuffer(out, np.int16).flatten().astype(np.float32) / 32768.0
+    return np.frombuffer(out, np.int16).flatten().astype(np.float16) / 32768.0
 
 # Function to convert audio to text w/ Whisper
 def convert_audio_to_text(audio_data, language_code):
