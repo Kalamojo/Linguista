@@ -6,3 +6,4 @@ python-dotenv
 streamlit-chat
 language-tool-python
 ffmpeg-python
+numpy
