@@ -17,7 +17,7 @@ openai_key = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=openai_key)
 
 
-model = whisper.load_model("small")
+model = whisper.load_model("base")
 # tool = language_tool_python.LanguageToolPublicAPI(language_code)
 
 def on_btn_click():
