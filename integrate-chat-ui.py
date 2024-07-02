@@ -30,7 +30,7 @@ def get_model_response(user_input):
     response = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[
-                {"role": "system", "content": f"Output your response in the {language} language"},
+                {"role": "system", "content": f"Respond to the user's dialogue in {language}. Ensure your response encourages the user to continue the conversation by asking simple and relevant follow-up questions, allowing them to lead the discussion. Next, provide a response in English that summarizes LanguageTool's findings about the user's input. Use simple terms to explain any grammatical errors the learner made, why these errors are incorrect in the context of {language} grammar, and how to correct them. Include detailed examples to illustrate the correct usage in the context of the conversation. Focus on natural speech patterns in {language}, unless the learner explicitly requests a different focus. Keep feedback concise yet helpful and split into manageable parts if there are multiple errors."},
                 {"role": "user", "content": user_input}
             ],
         
