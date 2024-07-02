@@ -1,8 +1,7 @@
 streamlit
 streamlit-mic-recorder
 openai
+openai-whisper
 python-dotenv
-streamlit-chat 
-streamlit-webrtc
-transformers
+streamlit-chat
 language-tool-python
