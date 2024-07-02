@@ -1,11 +1,11 @@
 import streamlit as st
 from streamlit_chat import message
 from streamlit_mic_recorder import mic_recorder
-import openai
 from openai import OpenAI
 import whisper
-import numpy as np
+import language_tool_python
 import tempfile
+import json
 import os
 from dotenv import load_dotenv
 
@@ -13,24 +13,34 @@ load_dotenv()
 openai_key = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=openai_key)
 
+
+language_code = 'es' # Spanish
+language = "Spanish"
+
+
 model = whisper.load_model("base")
+tool = language_tool_python.LanguageToolPublicAPI(language_code)
 
 def on_btn_click():
     del st.session_state.past[:]
     del st.session_state.generated[:]
 
-# Function to get response from GPT
-def get_response_from_model(user_input):
+# Function to get model response
+def get_model_response(user_input):
     response = client.chat.completions.create(
         model="gpt-3.5-turbo",
-        messages=[{"role": "user", "content": user_input}]
+        messages=[
+                {"role": "system", "content": f"Output your response in the {language} language"},
+                {"role": "user", "content": user_input}
+            ],
+        
     )
     print(response)
     return response.choices[0].message.content
 
-# Function to get model response
-def get_model_response(user_input):
-    return get_response_from_model(user_input)
+def get_languagetool_response(user_input):
+    matches = tool.check(user_input)
+    return [json.dumps(match.__dict__) for match in matches]
 
 st.session_state.setdefault(
     'past', 
@@ -45,8 +55,11 @@ def on_input_change():
     user_input = st.session_state.user_input
     print("bruh something happened", user_input, "fr")
     model_response = get_model_response(user_input)
+    grammar_response = get_languagetool_response(user_input)
+    print(grammar_response)
     st.session_state.past.append(user_input)
     st.session_state.generated.append(model_response)
+    st.session_state.generated.append(str(grammar_response)) # right now just adding string version of grammar response
 
 
 # Function to convert audio to text w/ Whisper
@@ -58,7 +71,7 @@ def convert_audio_to_text(audio_data):
     audio = whisper.load_audio(tmp_file_path)
     audio = whisper.pad_or_trim(audio)
     mel = whisper.log_mel_spectrogram(audio).to(model.device)
-    options = whisper.DecodingOptions(language="en")
+    options = whisper.DecodingOptions(language=language_code)
     result = whisper.decode(model, mel, options)
     return result.text
 
@@ -72,10 +85,13 @@ def recording_callback():
 
 chat_placeholder = st.empty()
 
-with chat_placeholder.container():    
-    for i in range(len(st.session_state['generated'])):                
+with chat_placeholder.container():
+    ind = 0    
+    for i in range(len(st.session_state['past'])):                
         message(st.session_state['past'][i], is_user=True, key=f"{i}_user")
-        message(st.session_state['generated'][i], is_user=False, key=f"{i}")
+        message(st.session_state['generated'][ind], is_user=False, key=f"{ind}")
+        message(st.session_state['generated'][ind+1], is_user=False, key=f"{ind+1}")
+        ind += 2
     
     st.button("Clear message", on_click=on_btn_click)
 

@@ -5,3 +5,4 @@ python-dotenv
 streamlit-chat 
 streamlit-webrtc
 transformers
+language-tool-python
