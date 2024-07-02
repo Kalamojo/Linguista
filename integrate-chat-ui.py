@@ -119,7 +119,7 @@ def convert_audio_to_text(audio_data, language_code):
     #result = whisper.decode(model, mel, options)
     #audio_file = io.BytesIO(audio_data)
     audio_file = load_audio(audio_data)
-    result = model.transcribe(audio_file, language=language_code)
+    result = model.transcribe(audio_file, language=language_code, fp16=True)
     print(result)
     return result['text']
 
