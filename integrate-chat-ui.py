@@ -120,7 +120,8 @@ def convert_audio_to_text(audio_data, language_code):
     #audio_file = io.BytesIO(audio_data)
     audio_file = load_audio(audio_data)
     result = model.transcribe(audio_file, language=language_code)
-    return result.text
+    print(result)
+    return result['text']
 
 def recording_callback():
     if st.session_state.my_recorder_output:
