@@ -4,3 +4,4 @@ openai
 python-dotenv
 streamlit-chat 
 streamlit-webrtc
+transformers
